@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>⚽ Champions League AI Bot</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+    :root {
+      --gold:      #c9a227;
+      --gold-dark: #a07d10;
+      --bg:        #080c18;
+      --bg2:       #0d1220;
+      --bg3:       #111827;
+      --border:    #1e2840;
+      --text:      #e2e8f8;
+      --text2:     #8892b0;
+      --text3:     #4a5568;
+      --blue:      #1a2a5e;
+      --blue2:     #0d1b3e;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ══════════════════ ШАПКА ══════════════════ */
+    header {
+      background: linear-gradient(135deg, var(--blue2) 0%, var(--blue) 100%);
+      border-bottom: 2px solid var(--gold);
+      padding: 0 20px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-shrink: 0;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.6);
+    }
+
+    .logo {
+      width: 44px; height: 44px;
+      background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      box-shadow: 0 0 16px rgba(201,162,39,0.4);
+      flex-shrink: 0;
+    }
+
+    .header-info h1 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 0.3px;
+    }
+
+    .header-info p {
+      font-size: 11px;
+      color: var(--text2);
+      margin-top: 1px;
+    }
+
+    .header-right {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .online-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(0,230,118,0.1);
+      border: 1px solid rgba(0,230,118,0.3);
+      border-radius: 20px;
+      padding: 4px 10px;
+      font-size: 11px;
+      color: #00e676;
+    }
+
+    .dot-green {
+      width: 7px; height: 7px;
+      background: #00e676;
+      border-radius: 50%;
+      box-shadow: 0 0 6px #00e676;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%,100% { opacity:1; transform:scale(1); }
+      50%      { opacity:0.5; transform:scale(0.85); }
+    }
+
+    /* ══════════════════ БЫСТРЫЕ ВОПРОСЫ ══════════════════ */
+    .quick-bar {
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 16px;
+      display: flex;
+      gap: 7px;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      flex-shrink: 0;
+    }
+
+    .quick-bar::-webkit-scrollbar { height: 3px; }
+    .quick-bar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    .qbtn {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      color: var(--text2);
+      padding: 6px 13px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.18s;
+      flex-shrink: 0;
+    }
+
+    .qbtn:hover {
+      background: var(--blue);
+      border-color: var(--gold);
+      color: var(--gold);
+      transform: translateY(-1px);
+    }
+
+    /* ══════════════════ ЧАТОВОЕ ОКНО ══════════════════ */
+    #chat {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    #chat::-webkit-scrollbar { width: 4px; }
+    #chat::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    /* ══ Приветствие ══ */
+    #welcome {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 20px;
+      text-align: center;
+      gap: 12px;
+    }
+
+    .welcome-trophy {
+      font-size: 72px;
+      filter: drop-shadow(0 0 20px rgba(201,162,39,0.5));
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%,100% { transform: translateY(0); }
+      50%      { transform: translateY(-8px); }
+    }
+
+    #welcome h2 {
+      font-size: 22px;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--gold), #fff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    #welcome p {
+      font-size: 13px;
+      color: var(--text3);
+      line-height: 1.7;
+      max-width: 340px;
+    }
+
+    .welcome-tags {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 4px;
+    }
+
+    .wtag {
+      background: rgba(201,162,39,0.08);
+      border: 1px solid rgba(201,162,39,0.2);
+      color: var(--gold);
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+
+    /* ══ Сообщения ══ */
+    .msg {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      animation: msgIn 0.25s ease;
+    }
+
+    @keyframes msgIn {
+      from { opacity:0; transform:translateY(10px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+
+    .msg.user { flex-direction: row-reverse; }
+
+    .avatar {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px;
+      flex-shrink: 0;
+    }
+
+    .avatar.bot  {
+      background: linear-gradient(135deg, var(--blue2), var(--blue));
+      border: 1.5px solid var(--gold);
+      box-shadow: 0 0 8px rgba(201,162,39,0.2);
+    }
+
+    .avatar.user {
+      background: linear-gradient(135deg, #1e3a5f, #0d2040);
+      border: 1.5px solid #3a5a8f;
+    }
+
+    .bubble {
+      max-width: 78%;
+      padding: 12px 16px;
+      border-radius: 18px;
+      font-size: 14px;
+      line-height: 1.65;
+    }
+
+    .bubble.bot {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-top-left-radius: 4px;
+      color: #d4dcf0;
+    }
+
+    .bubble.user {
+      background: linear-gradient(135deg, #1a3a6e, #0d2448);
+      border: 1px solid #2a4a7e;
+      border-top-right-radius: 4px;
+      color: #e0eaff;
+    }
+
+    /* ══ Typing ══ */
+    .typing-dots {
+      display: flex; gap: 5px; padding: 4px 0; align-items: center;
+    }
+
+    .typing-dots span {
+      width: 8px; height: 8px;
+      background: var(--gold);
+      border-radius: 50%;
+      animation: bounce 1.1s infinite;
+    }
+
+    .typing-dots span:nth-child(2) { animation-delay: 0.18s; }
+    .typing-dots span:nth-child(3) { animation-delay: 0.36s; }
+
+    @keyframes bounce {
+      0%,80%,100% { transform: translateY(0); opacity:0.4; }
+      40%          { transform: translateY(-7px); opacity:1; }
+    }
+
+    /* ══════════════════ ПАНЕЛЬ ВВОДА ══════════════════ */
+    .input-panel {
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+      padding: 12px 16px;
+      flex-shrink: 0;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+      background: var(--bg3);
+      border: 1.5px solid var(--border);
+      border-radius: 16px;
+      padding: 8px 8px 8px 16px;
+      transition: border-color 0.2s;
+    }
+
+    .input-row:focus-within {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(201,162,39,0.08);
+    }
+
+    #msg-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-size: 14px;
+      font-family: 'Inter', sans-serif;
+      resize: none;
+      max-height: 120px;
+      line-height: 1.5;
+      padding: 4px 0;
+    }
+
+    #msg-input::placeholder { color: var(--text3); }
+
+    #send-btn {
+      width: 40px; height: 40px;
+      background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 18px;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.18s;
+      flex-shrink: 0;
+    }
+
+    #send-btn:hover   { transform: scale(1.08); box-shadow: 0 4px 14px rgba(201,162,39,0.4); }
+    #send-btn:active  { transform: scale(0.95); }
+    #send-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    .hint { font-size: 11px; color: var(--text3); text-align: center; margin-top: 8px; }
+
+    /* ══ Ошибка ══ */
+    .error-bubble {
+      background: rgba(220, 50, 50, 0.08);
+      border: 1px solid rgba(220,50,50,0.3);
+      color: #fc8181;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── ШАПКА ── -->
+<header>
+  <div class="logo">🏆</div>
+  <div class="header-info">
+    <h1>Champions League AI</h1>
+    <p>Эксперт по UEFA Champions League · Powered by Groq</p>
+  </div>
+  <div class="header-right">
+    <div class="online-badge">
+      <div class="dot-green"></div>
+      Онлайн
+    </div>
+  </div>
+</header>
+
+<!-- ── БЫСТРЫЕ ВОПРОСЫ ── -->
+<div class="quick-bar">
+  <button class="qbtn" onclick="ask('Кто выиграл Лигу Чемпионов больше всего раз?')">🏆 Рекорды побед</button>
+  <button class="qbtn" onclick="ask('Кто лучший бомбардир в истории ЛЧ?')">⚽ Топ бомбардиры</button>
+  <button class="qbtn" onclick="ask('Какой клуб выиграл ЛЧ последний раз?')">📅 Последний победитель</button>
+  <button class="qbtn" onclick="ask('Расскажи о самых драматичных финалах ЛЧ')">🎬 Драматичные финалы</button>
+  <button class="qbtn" onclick="ask('Как работает формат Лиги Чемпионов в 2024-2025?')">📋 Формат турнира</button>
+  <button class="qbtn" onclick="ask('Какой камбэк был самым невероятным в истории ЛЧ?')">🔥 Лучшие камбэки</button>
+  <button class="qbtn" onclick="ask('Расскажи о гимне Лиги Чемпионов')">🎵 Гимн ЛЧ</button>
+</div>
+
+<!-- ── ЧАТ ── -->
+<div id="chat">
+  <div id="welcome">
+    <div class="welcome-trophy">🏆</div>
+    <h2>Champions League AI</h2>
+    <p>Задайте любой вопрос о Лиге Чемпионов УЕФА — история, статистика, клубы, игроки, финалы.</p>
+    <div class="welcome-tags">
+      <span class="wtag">⚽ Матчи</span>
+      <span class="wtag">📊 Статистика</span>
+      <span class="wtag">🏟️ Клубы</span>
+      <span class="wtag">🌟 Игроки</span>
+      <span class="wtag">📅 История</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── ВВОД ── -->
+<div class="input-panel">
+  <div class="input-row">
+    <textarea
+      id="msg-input"
+      placeholder="Спросите про Лигу Чемпионов..."
+      rows="1"
+    ></textarea>
+    <button id="send-btn" onclick="send()" title="Отправить (Enter)">➤</button>
+  </div>
+  <p class="hint">Enter — отправить &nbsp;·&nbsp; Shift+Enter — новая строка</p>
+</div>
+
+<script>
+  const chatEl   = document.getElementById('chat');
+  const inputEl  = document.getElementById('msg-input');
+  const sendBtn  = document.getElementById('send-btn');
+
+  // История разговора (бот помнит контекст)
+  const history = [];
+
+  // ── Быстрый вопрос по кнопке ──
+  function ask(text) {
+    inputEl.value = text;
+    send();
+  }
+
+  // ── Главная функция отправки ──
+  async function send() {
+    const text = inputEl.value.trim();
+    if (!text || sendBtn.disabled) return;
+
+    // удаляем приветствие
+    const welcome = document.getElementById('welcome');
+    if (welcome) welcome.remove();
+
+    addMsg('user', text);
+    inputEl.value = '';
+    autoResize();
+
+    sendBtn.disabled = true;
+    const typingId = addTyping();
+
+    try {
+      const res = await fetch('/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text, history })
+      });
+
+      const data = await res.json();
+      removeEl(typingId);
+
+      if (res.ok) {
+        addMsg('bot', data.reply);
+
+        // сохраняем в историю для контекста
+        history.push({ role: 'user',      content: text });
+        history.push({ role: 'assistant', content: data.reply });
+
+        // максимум 20 сообщений в истории (10 пар)
+        if (history.length > 20) history.splice(0, 2);
+
+      } else {
+        addMsg('bot', '❌ ' + (data.detail || 'Ошибка сервера'), true);
+      }
+
+    } catch {
+      removeEl(typingId);
+      addMsg('bot',
+        '❌ Не могу подключиться к серверу.\n\n' +
+        'Убедись что сервер запущен:\n' +
+        'uvicorn main:app --reload', true);
+    }
+
+    sendBtn.disabled = false;
+    inputEl.focus();
+  }
+
+  // ── Добавить сообщение в чат ──
+  function addMsg(role, text, isError = false) {
+    const wrap = document.createElement('div');
+    wrap.className = `msg ${role}`;
+
+    const av = document.createElement('div');
+    av.className = `avatar ${role}`;
+    av.textContent = role === 'bot' ? '🏆' : '👤';
+
+    const bub = document.createElement('div');
+    bub.className = `bubble ${role}${isError ? ' error-bubble' : ''}`;
+    bub.innerHTML = fmt(text);
+
+    wrap.appendChild(av);
+    wrap.appendChild(bub);
+    chatEl.appendChild(wrap);
+    scrollDown();
+  }
+
+  // ── Анимация "печатает..." ──
+  function addTyping() {
+    const id = 'ty-' + Date.now();
+    const wrap = document.createElement('div');
+    wrap.id = id;
+    wrap.className = 'msg bot';
+    wrap.innerHTML = `
+      <div class="avatar bot">🏆</div>
+      <div class="bubble bot">
+        <div class="typing-dots">
+          <span></span><span></span><span></span>
+        </div>
+      </div>`;
+    chatEl.appendChild(wrap);
+    scrollDown();
+    return id;
+  }
+
+  function removeEl(id) {
+    const el = document.getElementById(id);
+    if (el) el.remove();
+  }
+
+  // ── Форматирование текста ──
+  function fmt(text) {
+    return text
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em>$1</em>')
+      .replace(/\n/g, '<br>');
+  }
+
+  function scrollDown() {
+    chatEl.scrollTop = chatEl.scrollHeight;
+  }
+
+  // ── Авторастяжение textarea ──
+  function autoResize() {
+    inputEl.style.height = 'auto';
+    inputEl.style.height = Math.min(inputEl.scrollHeight, 120) + 'px';
+  }
+
+  inputEl.addEventListener('input', autoResize);
+
+  // ── Enter = отправить, Shift+Enter = перенос ──
+  inputEl.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      send();
+    }
+  });
+</script>
+</body>
+</html>
